@@ -2,10 +2,12 @@
 
 ## 🎯 Descrição
 
-Sistema completo para avaliação de enquadramento de profissionais em níveis (A-G) baseado em 10 critérios objetivos de competências, utilizando moda estatística com critérios de desempate automáticos.
+Sistema completo para avaliação de enquadramento de profissionais em níveis (A-G) baseado em 10 critérios objetivos de competências, utilizando moda estatística com critérios de desempate automáticos. Interface interativa em tempo real que mostra descrições completas ao selecionar cada opção.
 
 ## 📋 Funcionalidades
 
+- ✅ **Interface em tempo real** - Descrições aparecem instantaneamente ao selecionar
+- ✅ Campo para nome do avaliado
 - ✅ Avaliação em 10 critérios detalhados
 - ✅ 7 níveis de progressão (A, A-B, B, C, D, E, F, G)
 - ✅ Cálculo automático por **moda estatística**
@@ -13,6 +15,7 @@ Sistema completo para avaliação de enquadramento de profissionais em níveis (
 - ✅ Análise de consistência das respostas
 - ✅ Recomendações personalizadas de desenvolvimento
 - ✅ Tabela de consolidação completa
+- ✅ **Exportação em PDF profissional**
 - ✅ Interface intuitiva e responsiva
 - ✅ Instruções de uso integradas para colaborador e gestor
 
@@ -22,7 +25,13 @@ Sistema completo para avaliação de enquadramento de profissionais em níveis (
 
 ```bash
 # Instalar dependências
-pip install streamlit pandas
+pip install streamlit pandas reportlab
+```
+
+Ou usando o arquivo requirements.txt:
+
+```bash
+pip install -r requirements.txt
 ```
 
 ### Executar Localmente
@@ -40,6 +49,28 @@ A aplicação abrirá automaticamente no navegador em `http://localhost:8501`
 streamlit run avaliacao_enquadramento.py --server.headless true
 ```
 
+## 💡 Como Funciona a Interface
+
+### Experiência do Usuário
+
+1. **Preencha o nome** do colaborador no campo no topo
+2. **Para cada critério:**
+   - Abra o dropdown "Escolha o nível"
+   - Veja a prévia de cada descrição (150 caracteres)
+   - **Ao selecionar, a descrição COMPLETA aparece imediatamente** numa caixa azul
+   - Leia a descrição completa para confirmar
+3. **Clique em "Calcular Enquadramento"** após preencher todos os 10 critérios
+4. **Veja os resultados** com análise completa
+5. **Exporte em PDF** para compartilhar ou arquivar
+
+### Diferencial: Atualização em Tempo Real
+
+A interface **não usa formulários tradicionais**. Cada seleção atualiza instantaneamente, mostrando a descrição completa do nível escolhido. Isso permite que o avaliador:
+- Leia todas as descrições antes de decidir
+- Compare diferentes níveis facilmente
+- Tome decisões mais informadas
+- Tenha uma experiência fluida e intuitiva
+
 ## 📊 Critérios de Avaliação
 
 1. **Tamanho e Complexidade da Carteira de Casos**
@@ -56,7 +87,7 @@ streamlit run avaliacao_enquadramento.py --server.headless true
 ## 🎓 Níveis de Progressão
 
 - **A**: Iniciante - Supervisão direta constante, aprendendo processos básicos
-- **A-B**: Transição - Entre A e B, ainda não mentora formalmente
+- **A-B**: Transição - Entre A e B, ainda não mentora formalmente (apenas critério 8)
 - **B**: Básico - Validação periódica, autonomia em tarefas rotineiras
 - **C**: Autônomo - Autonomia completa em casos simples padronizados
 - **D**: Referência - Excelência em casos simples, mentor de A-B-C
@@ -82,10 +113,27 @@ O sistema verifica qual dos níveis empatados aparece em 2 dos 3 critérios de d
 
 O sistema calcula automaticamente o "spread" entre os níveis marcados:
 
-- **Spread ≤ 1**: Alta consistência ✅
-- **Spread ≤ 2**: Consistência boa ℹ️
-- **Spread ≤ 3**: Consistência moderada ⚠️
-- **Spread > 3**: Baixa consistência - requer análise detalhada ⚠️
+- **Spread ≤ 1**: Alta consistência ✅ - Profissional muito bem posicionado
+- **Spread ≤ 2**: Consistência boa ℹ️ - Situação normal e esperada
+- **Spread ≤ 3**: Consistência moderada ⚠️ - Requer plano de desenvolvimento focado
+- **Spread > 3**: Baixa consistência ⚠️ - Necessita análise detalhada
+
+## 📄 Exportação em PDF
+
+O sistema gera um PDF profissional contendo:
+
+- 📋 **Cabeçalho** - Nome do avaliado, data e hora da avaliação
+- 🎯 **Resultado Principal** - Nível sugerido, método usado, frequência
+- 📊 **Distribuição por Nível** - Tabela com contagem de cada nível
+- 📝 **Tabela de Consolidação** - Todos os critérios e níveis marcados
+- 📖 **Detalhamento Completo** - Descrição de cada critério e nível selecionado
+- 🎨 **Layout Profissional** - Cores, formatação e estrutura organizada
+
+O PDF é ideal para:
+- Compartilhar com o colaborador avaliado
+- Arquivar no histórico de avaliações
+- Apresentar em reuniões de calibração
+- Documentar processos de promoção
 
 ## 👥 Público-Alvo
 
@@ -110,54 +158,96 @@ O sistema calcula automaticamente o "spread" entre os níveis marcados:
 
 ## 🔄 Próximos Passos Após Avaliação
 
-1. **Resultado Consistente (80%+ no mesmo nível)**
+### 1. Resultado Consistente (80%+ no mesmo nível)
    - Validar com evidências concretas
    - Formalizar posicionamento
    - Estabelecer objetivos para próximo nível
 
-2. **Resultado com Variação (60-80% no nível predominante)**
+### 2. Resultado com Variação (60-80% no nível predominante)
    - Identificar critérios abaixo do predominante
    - Criar plano de desenvolvimento focado
    - Revisão em 3-6 meses
 
-3. **Resultado Disperso (<60% de consistência)**
+### 3. Resultado Disperso (<60% de consistência)
    - Conversa de calibração gestor-colaborador
    - Revisar evidências com profundidade
    - Plano de desenvolvimento individualizado
    - Revisão em 60-90 dias
 
-## 🛠️ Extensibilidade
+## 🛠️ Tecnologias Utilizadas
 
-Para adicionar novos critérios, edite o dicionário `criterios` no arquivo Python:
+- **Streamlit** - Framework web interativo para Python
+- **Pandas** - Manipulação e análise de dados
+- **ReportLab** - Geração profissional de PDFs
+- **Python 3.8+** - Linguagem de programação
 
-```python
-criterios = {
-    "11. Novo Critério": {
-        "A": "Descrição do nível A",
-        "B": "Descrição do nível B",
-        # ... demais níveis
-    }
-}
+## 🔧 Resolução de Problemas
+
+### ModuleNotFoundError: No module named 'reportlab'
+```bash
+pip install reportlab
 ```
 
-## 📊 Saídas do Sistema
+### Botão de reset não limpa as opções
+O botão agora limpa corretamente todo o session_state e recarrega a página.
 
-1. **Nível Sugerido**: Baseado em moda estatística
-2. **Método Usado**: Moda, Desempate ou Ordem Alfabética
-3. **Distribuição**: Gráfico de frequência por nível
-4. **Tabela de Consolidação**: Todos os critérios e níveis marcados
-5. **Análise de Consistência**: Spread e recomendações
-6. **Próximos Passos**: Baseados no padrão de resposta
+### PDF não está sendo gerado
+1. Certifique-se de instalar: `pip install reportlab`
+2. Verifique se preencheu o nome do avaliado
+3. Verifique se completou todos os 10 critérios
+
+### Descrições não aparecem ao selecionar
+Se isso acontecer, recarregue a página (F5). A versão atual atualiza em tempo real automaticamente.
+
+## 📦 Estrutura dos Arquivos
+
+```
+.
+├── avaliacao_enquadramento.py  # Aplicação principal (599 linhas)
+├── requirements.txt             # Dependências do projeto
+├── README.md                    # Esta documentação
+└── INSTALACAO.md               # Guia detalhado de instalação
+```
 
 ## 💡 Melhorias Futuras Possíveis
 
-- [ ] Exportação de resultados em PDF
-- [ ] Histórico de avaliações ao longo do tempo
 - [ ] Comparação entre auto-avaliação e avaliação do gestor
+- [ ] Histórico de avaliações ao longo do tempo
+- [ ] Gráficos de evolução por critério
 - [ ] Plano de desenvolvimento automático baseado em gaps
 - [ ] Dashboard consolidado com múltiplos colaboradores
 - [ ] Integração com sistema de metas e PDIs
+- [ ] Exportação em XLSX além de PDF
+- [ ] Sistema de comentários por critério
 
-## 📝 Licença
+## 📝 Changelog
+
+### Versão 2.0 (Atual)
+- ✅ Interface em tempo real (sem formulários)
+- ✅ Descrições aparecem instantaneamente ao selecionar
+- ✅ Campo de nome do avaliado
+- ✅ Exportação em PDF profissional
+- ✅ Botão de reset corrigido
+- ✅ Análise de consistência aprimorada
+
+### Versão 1.0
+- Versão inicial com formulários
+- 10 critérios de avaliação
+- Cálculo por moda estatística
+- Critérios de desempate automáticos
+
+## 📞 Suporte
+
+Para dúvidas ou problemas:
+1. Consulte o arquivo INSTALACAO.md para guia passo a passo
+2. Verifique se todas as bibliotecas estão instaladas
+3. Certifique-se de estar usando Python 3.8 ou superior
+4. Em caso de erro, leia a mensagem de erro completa
+
+## 📄 Licença
 
 Uso interno - Controladoria / Gestão de Pessoas
+
+---
+
+**Desenvolvido com ❤️ para otimizar o processo de avaliação e desenvolvimento de pessoas**
