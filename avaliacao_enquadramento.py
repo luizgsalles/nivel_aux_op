@@ -171,17 +171,20 @@ def gerar_pdf(nome_avaliado, respostas, nivel_final, metodo_usado, max_frequenci
 
 # Configuração da página
 st.set_page_config(
-    page_title="Avaliação de Enquadramento - Auxiliar Operacional",
+    page_title="Avaliação de Enquadramento - Nivelamento Operacional",
     page_icon="📊",
     layout="wide"
 )
 
+
+
 # Título principal
-st.title("📊 Avaliação de Enquadramento - Auxiliar Operacional")
+st.title("📊 Avaliação de Enquadramento - Nivelamento Operacional")
 st.markdown("---")
 
 # Dicionário com todas as dimensões e seus níveis
-criterios = {
+
+CRITERIOS_AUXILIAR = {
     "1. Tamanho e Complexidade da Carteira de Casos": {
         "A": "Carteira de 8-12 casos simples, executa sob supervisão direta do Nível D ou Assistente (valida 80-90% das ações antes de executar), TMR não é medido individualmente ainda ou está >10 dias, foco é aprender processos básicos",
         "B": "Carteira de 12-18 casos simples, executa com validação periódica do gestor (valida 50-60% das decisões, reuniões semanais vs diárias), TMR ~7-9 dias, começa a ter autonomia em casos mais rotineiros",
@@ -273,6 +276,102 @@ criterios = {
     }
 }
 
+
+CRITERIOS_ASSISTENTE = {
+    "1. Tamanho e Complexidade da Carteira de Casos": {
+        "A": "Carteira de 15-20 casos médios iniciais (10-12 simples residuais + 5-8 médios iniciais com ambiguidade leve), executa sob supervisão próxima do Analista (valida 70-80% das decisões críticas, check-in diário 20-30min), TMR não medido separadamente ou >15 dias, foco é aprender a tratar casos que fogem de playbooks",
+        "B": "Carteira de 25-35 casos (20-25 médios + 5-10 simples residuais), executa com validação periódica (valida 40-50% das decisões, reunião semanal 30-45min vs diária), TMR ~10-12 dias para casos médios, começa a ter autonomia em casos médios padronizados",
+        "C": "Carteira de 35-45 casos médios com autonomia completa no espectro de casos médios, TMR <7 dias, FCR >70%, valida apenas situações atípicas ou de alto impacto, é referência técnica para Assistentes A-B consultada 5-10x por semana",
+        "D": "Carteira de 40-50 casos médios com excelência (TMR <5.5 dias, FCR >75%, prazo >97%), é referência formal consultada por todos Assistentes A-B-C (20-30x/semana), mentora 3-4 Auxiliares, frequentemente melhor performance individual do setor",
+        "E": "Mantém 40-50 casos médios com excelência (TMR <5.5d, FCR >75%) + resolve 3-5 casos complexos iniciais/mês do Analista sob supervisão próxima (valida 80-90% decisões críticas nesses casos), casos complexos têm valores R$ 1.500-3.000 ou múltiplas partes envolvidas",
+        "F": "Reduz para 25-35 casos médios críticos + resolve 8-12 casos complexos/mês com autonomia crescente (valida 50-60% decisões em casos complexos), casos complexos R$ 2.000-5.000, mantém excelência em ambos os escopos simultaneamente",
+        "G": "Carteira mínima de 15-25 casos médios estratégicos + resolve 12-15 casos complexos/mês com autonomia 70-80%, casos complexos até R$ 5.000-8.000, atua quase como Analista A-B, pronto para promoção iminente"
+    },
+    "2. Autonomia e Necessidade de Supervisão": {
+        "A": "Precisa de supervisão próxima constante do Analista: check-in diário de 20-30min, valida 70-80% das decisões críticas antes de executar (especialmente em casos médios que fogem de playbook), executa casos simples residuais com autonomia mas casos médios requerem validação frequente",
+        "B": "Executa com acompanhamento periódico: reunião semanal de 30-45min vs diária, valida 40-50% das decisões (situações de maior impacto ou risco), toma decisões autônomas em casos médios padronizados mas valida quando há ambiguidade significativa ou valor >R$ 1.000",
+        "C": "Autonomia completa em espectro de casos médios: valida apenas situações genuinamente atípicas ou de alto impacto estratégico (~20% do tempo), toma decisões sozinho em 80%+ das situações incluindo improvisação básica em casos médios, consulta Analista apenas 2-3x por semana",
+        "D": "Autonomia total em casos médios + valida trabalho de outros: é quem valida decisões de Assistentes A-B-C, raramente precisa consultar Analista (apenas situações extraordinárias 1-2x por mês), toma todas as decisões dentro do escopo de casos médios sem supervisão",
+        "E": "Mantém autonomia total em casos médios + desenvolve autonomia em casos complexos iniciais sob supervisão próxima: primeiros 2-3 meses valida 80-90% das decisões críticas em casos complexos, reduz gradualmente para 60-70% conforme Analista ganha confiança",
+        "F": "Autonomia crescente em casos complexos: valida 50-60% das decisões em casos complexos (vs 80-90% no E), toma decisões com 60-70% informação aceitando incerteza, demonstra julgamento cada vez mais sólido, Analista precisa validar apenas situações de alto risco ou precedente",
+        "G": "Autonomia 70-80% em casos complexos: valida apenas 30-40% das decisões (situações de altíssimo valor >R$ 5.000, precedentes críticos, múltiplos stakeholders complexos), atua com autonomia equivalente a Analista júnior, Analista confia em julgamento na maioria das situações"
+    },
+    "3. Competências em Sistemas e Ferramentas (SYSEMP/THORPE/INTELIPOST)": {
+        "A": "Domina 90%+ funcionalidades operacionais do Auxiliar D + aprende funcionalidades avançadas: abre CRM, altera status complexos, transfere entre filas, cria views personalizadas com múltiplos critérios, exporta relatórios customizados, ainda precisa de ajuda ocasional em funcionalidades muito avançadas (1-2x por semana)",
+        "B": "Domina 95%+ funcionalidades incluindo avançadas: cria views complexas com 5-7 critérios, relatórios customizados com filtros sofisticados, exportações em múltiplos formatos, identifica bugs com descrição clara, ajuda Auxiliares e Assistentes A com dúvidas (5-10x por semana), conhece workarounds para limitações",
+        "C": "Domina 98%+ funcionalidades incluindo raras/especializadas: cria automações simples (alertas, notificações), relatórios avançados com fórmulas, integração básica com outros sistemas, é consultado por Assistentes A-B e até Auxiliares D (10-20x por semana), propõe melhorias de arquitetura ou novos campos",
+        "D": "Domínio completo 100% + consultoria técnica: usa funcionalidades que apenas Analistas normalmente usam, cria workflows complexos quando sistema permite, treina Assistentes A-B-C e Auxiliares em funcionalidades avançadas (workshops 2-3h), é consultado até por Analistas sobre sistema (5-10x por semana), pode ser ponto focal com fornecedor do sistema",
+        "E": "Mantém domínio completo em SYSEMP + desenvolve uso de ferramentas analíticas que Analistas usam: aprende ferramentas de BI (Looker Studio, Power BI básico), consulta banco de dados quando necessário (queries SQL simples se empresa permite), extrai e cruza dados de múltiplos sistemas para investigação de casos complexos",
+        "F": "Uso avançado de ferramentas analíticas: cria dashboards básicos consolidando 3-4 sistemas, queries SQL intermediárias para análises específicas, usa ferramentas de BI para identificar padrões em 100-200 casos, exporta dados estruturados que Analistas usam em análises estratégicas",
+        "G": "Uso de ferramentas próximo de Analista A-B: dashboards automatizados atualizando diariamente, queries SQL avançadas com joins de múltiplas tabelas, análises em BI que geram insights acionáveis, cria views/relatórios customizados que viram padrão do setor, competência técnica em sistemas rivaliza Analistas júnior"
+    },
+    "4. Excel e Análise de Dados": {
+        "A": "Excel Intermediário: PROCV, SOMASES com 2-3 critérios, tabelas dinâmicas básicas, formatação condicional, gráficos simples, trabalha com bases até 2-3k linhas, cria relatórios de 1-2 páginas consolidando dados de casos médios",
+        "B": "Excel Intermediário+: Tabelas dinâmicas com campos calculados, gráficos diversos (dispersão, barras empilhadas, heatmaps básicos), fórmulas aninhadas avançadas (SE + PROCV + SEERRO), formatação condicional com fórmulas, trabalha com bases até 5-10k linhas, identifica correlações simples visualmente",
+        "C": "Excel Avançado Inicial: ÍNDICE+CORRESP, PROCV com correspondência aproximada, dashboards básicos com 5-8 KPIs linkados, macros gravadas (não escreve VBA mas grava e executa), trabalha com bases até 20-30k linhas, cria relatórios analíticos de 3-5 páginas com insights básicos",
+        "D": "Excel Avançado: Power Query básico (importa e limpa dados de múltiplas fontes), tabelas dinâmicas avançadas (múltiplos campos calculados, segmentadores, timelines), fórmulas matriciais simples, dashboards com 10-15 KPIs inter-relacionados, macros editadas em VBA (não escritas do zero), análises com bases 30-50k linhas, apresenta insights estruturados",
+        "E": "Mantém Excel Avançado + desenvolve análise estatística básica para casos complexos: calcula não apenas média mas mediana/percentis/desvio padrão, identifica outliers estatisticamente, usa correlação simples para validar hipóteses (Pearson), cria modelos simples de previsão (regressão linear básica), análises de 100-200 casos complexos",
+        "F": "Excel Avançado + BI Intermediário: Power Query consolidando 3-5 fontes automaticamente, dashboards automatizados que atualizam ao refresh, macros VBA intermediárias (edita e adapta scripts existentes), estatística intermediária (teste t, análise de variância básica, regressão múltipla com 2-3 variáveis), análises de 200-400 casos com insights profundos",
+        "G": "Excel Expert próximo de Analista: Power Query com transformações complexas (merge/append de múltiplas queries), VBA avançado (escreve scripts novos de 50-100 linhas), integração com APIs para importação automatizada, modelos estatísticos que Analistas usam (regressão múltipla avançada, séries temporais básicas), apresenta análises em formato executivo para Coordenação"
+    },
+    "5. Comunicação e Negociação com Stakeholders": {
+        "A": "Contatos de média complexidade básica (10-15min): adapta tom ao contexto emocional do cliente, explica situações com ambiguidade leve sem jargões, coleta informações com perguntas abertas/fechadas estratégicas, negocia soluções simples (até 10-15% desconto, +7-10 dias prazo, cortesias pequenas), escala quando valor >R$ 500-1.000 ou cliente ameaça Reclame Aqui/Procon",
+        "B": "Contatos de média complexidade consolidada (10-20min): gerencia clientes moderadamente insatisfeitos com de-escalação efetiva (60-70% resolve sem escalar), negocia soluções balanceando cliente e empresa (combinações de desconto + prazo + cortesia até R$ 1.000-1.500), coordena com transportadoras usando templates personalizados, escala quando valor >R$ 1.500 ou situação politicamente sensível",
+        "C": "Contatos complexos com múltiplos stakeholders (15-25min): coordena comunicação entre cliente + transportadora + fornecedor quando aplicável, adapta mensagem para cada stakeholder (mais técnica para fornecedor, mais empática para cliente, mais assertiva para transportadora), negocia ajustes operacionais simples com transportadoras (antecipa/posterga 1-2 dias, horário específico), identifica quando situação exige escalação para Analista (>R$ 2.000, múltiplas partes com interesses muito conflitantes)",
+        "D": "Comunicação estratégica em múltiplos canais (15-30min): participa de reuniões mensais com transportadoras apresentando análises de 15-20min, negocia com focais diretos de transportadoras (analistas/coordenadores), gerencia clientes VIP ou situações de crise potencial, coordena comunicação interna entre 3-4 áreas quando caso impacta múltiplos times, negocia dentro de alçada estabelecida (até R$ 2.000-2.500) autonomamente",
+        "E": "Mantém comunicação nível D em casos médios + desenvolve comunicação para casos complexos iniciais: aprende a negociar situações de maior valor (R$ 3.000-5.000) e complexidade (múltiplos stakeholders com interesses conflitantes), prepara-se para negociações identificando BATNA básico, conduz conversas de 20-40min mantendo relacionamento positivo mesmo com conflito, ainda valida estratégia de comunicação crítica com Analista",
+        "F": "Negociação complexa intermediária (20-40min): usa técnicas estruturadas (negociação baseada em interesses, identifica BATNA próprio e da outra parte), propõe soluções win-win criativas que expandem valor além de concessões simples, gerencia situações com assimetria de informação, negocia acordos que envolvem 3-4 partes simultaneamente (cliente + transportadora + fornecedor + áreas internas), documenta acordos com precisão criando term sheets quando apropriado",
+        "G": "Negociação e comunicação executiva próxima de Analista: prepara meticulosamente para negociações complexas (análise BATNA completa, ZOPA mapeada, estratégia definida), conduz negociações de 30-60min de alto valor (até R$ 8.000-10.000), participa de reuniões estratégicas com transportadoras contribuindo ativamente (não apenas observando), gerencia stakeholders executivos ocasionalmente (coordenadores/gerentes de transportadoras, gerentes de áreas internas), competência de negociação rivaliza Analistas júnior"
+    },
+    "6. Análise de Causa Raiz e Resolução de Problemas Complexos": {
+        "A": "Análise de casos médios iniciais: identifica problema real vs sintoma em casos com ambiguidade leve, formula 2-3 hipóteses sobre causa quando caso foge de playbook, coleta informações de 2-3 fontes sistematicamente, propõe solução consultando casos similares anteriores e validando com Analista, documenta raciocínio básico (não apenas ações mas por que tomou aquelas ações)",
+        "B": "Análise estruturada de casos médios: usa metodologia básica (5 Porquês até 3-4 níveis, perguntas 'por que' iterativas), formula 2-3 hipóteses avaliando probabilidade relativa, coleta evidências de múltiplas fontes (sistemas + comunicações + documentos), toma decisões com 70-80% informação, identifica quando caso evolui para complexo e precisa escalar, documenta análise em formato semi-estruturado",
+        "C": "Análise profunda multifacetada: aplica frameworks formais (5 Porquês rigoroso, Ishikawa básico identificando categorias de causas), quebra casos complexos médios em componentes gerenciáveis, formula múltiplas hipóteses concorrentes priorizando por probabilidade x impacto, usa raciocínio contrafactual básico ('se X fosse verdade deveria observar Y, não observo Y então X provavelmente não é causa'), documenta análise em 1-2 páginas estruturadas, identifica padrões em 20-30 casos similares",
+        "D": "Análise sistêmica identificando padrões: além de resolver caso individual, identifica causas raiz sistêmicas em 50-100 casos (observa que 60% dos problemas tipo X vêm de causa Y específica), usa frameworks múltiplos conforme contexto (5 Porquês, Ishikawa, Análise de Pareto, FTA básico), diferencia causas raiz primárias vs secundárias vs contribuintes, propõe soluções estruturais que previnem recorrência (pequenas mudanças de processo, ajustes de sistema, treinamentos), documenta análises que servem de referência para A-B-C",
+        "E": "Mantém análise profunda em casos médios + desenvolve análise para casos complexos iniciais: aprende metodologias que Analistas usam (análise contrafactual rigorosa, árvores de decisão com probabilidades, análise de cenários), investiga casos onde há múltiplas variáveis interdependentes e ambiguidade alta, coleta dados de 5-8 fontes incluindo entrevistas com stakeholders, análises levam 3-6h vs 1-2h de casos médios, ainda valida raciocínio analítico com Analista em casos críticos",
+        "F": "Análise de casos complexos intermediária: conduz investigações profundas de 4-8h cruzando múltiplas fontes de evidência, entrevista 3-5 stakeholders com técnicas estruturadas (perguntas abertas exploratórias, perguntas fechadas de validação, escuta ativa), analisa dados quantitativos e qualitativos, identifica inconsistências entre versões de diferentes stakeholders e investiga discrepâncias, documenta análise em dossiê de 2-3 páginas (cronologia + stakeholders + hipóteses + evidências + recomendação), usa frameworks avançados (análise de opções com prós/contras/riscos de cada)",
+        "G": "Análise de casos complexos avançada próxima de Analista: metodologias rigorosas de Analista (Ishikawa completo com todas categorias, Análise de Pareto quantitativa, raciocínio contrafactual testando hipóteses sistematicamente), investigações de 6-12h quando necessário, análises de impacto de negócio quantificadas (não apenas 'resolve o problema' mas 'problema custa R$ X, solução Y economiza R$ Z'), dossiês de 3-5 páginas que Analistas consideram 'quase nível de Analista', competência analítica rivaliza Analistas júnior"
+    },
+    "7. Gestão de Prazos, Priorização e Monitoramento Proativo": {
+        "A": "Priorização de carteira pequena (15-20 casos): usa planilha + views de sistema para monitorar prazos, identifica casos próximos de vencer (3-5 dias antes) e age, prioriza dinamicamente considerando urgência/importância básica, comunica quando sobrecarga ameaça prazos (antes de efetivamente perder), mantém TMR >12-15 dias inicialmente mas melhora ao longo do nível",
+        "B": "Priorização de carteira média (25-35 casos): múltiplas ferramentas (planilha + SYSEMP views customizadas + alertas), identifica diariamente casos próximos prazo ou travados (parados >5-7 dias sem progresso), prioriza usando matriz urgente/importante, follow-up calibrado à situação (educado após 48h, urgente após 72h, escala após 96h), mantém TMR ~10-12 dias, auto-consciência sobre performance (sabe quando está performando bem vs quando está lutando)",
+        "C": "Priorização otimizada de carteira grande (35-45 casos): mantém visão consolidada de saúde da carteira (quantos em cada status, tendências, casos críticos), trabalha em lote quando eficiente (5-8 casos similares sequencialmente), identifica causas de travamento (esperando resposta de quem? bloqueado por que? preciso de qual informação?), decisão consciente de destravar ou escalar após 10 dias travado, TMR <7 dias, revisa 100% carteira semanalmente sistematicamente, raramente perde prazos (<1x por trimestre com justificativa válida)",
+        "D": "Priorização de excelência em carteira máxima (40-50 casos): mantém TMR <5.5 dias (30-40% melhor que A-B-C) através de eficiência maximizada, antecipa problemas antes de virarem críticos (identifica padrões de travamento e age preventivamente), absorve picos de 60-70 casos temporariamente sem deterioração significativa de qualidade, comunica proativamente quando capacidade está no limite, nunca perde prazos sem força maior, é modelo de gestão de carteira para todos Assistentes",
+        "E": "Mantém gestão excelente de 40-50 casos médios + aprende gestão de 3-5 casos complexos iniciais: desenvolve capacidade de balancear casos médios urgentes vs casos complexos importantes mas menos urgentes, aprende a estimar tempo necessário para investigação de casos complexos (pode levar 3-6h vs 30-60min de casos médios), ajusta priorização quando caso complexo se mostra mais difícil que esperado, não permite que casos complexos causem deterioração de TMR em casos médios",
+        "F": "Priorização híbrida sofisticada (25-35 médios + 8-12 complexos): balanceia usando critérios múltiplos (urgência + importância + esforço + impacto + risco), aloca tempo de forma estratégica (blocos de 3-4h para casos complexos que requerem análise profunda, gaps de 30-60min para casos médios entre blocos), identifica trade-offs e toma decisões conscientes (pode precisar sacrificar TMR de caso médio menos crítico para garantir qualidade de caso complexo mais importante), mantém performance competitiva em ambos simultaneamente",
+        "G": "Priorização estratégica de portfólio completo (15-25 médios + 12-15 complexos): visão consolidada e dinâmica ajustando ao longo do dia conforme situação evolui, identifica antecipadamente quando carga é insustentável e negocia redistribuição ou extensão de prazo antes de comprometer qualidade, priorização próxima de Analista júnior (considera não apenas urgência/importância mas também impacto estratégico no negócio, precedentes, visibilidade executiva), mantém TMR competitivo em ambos tipos (médios <6d, complexos <10d)"
+    },
+    "8. Mentoria e Desenvolvimento de Pessoas": {
+        "A": "Mentoria informal de Auxiliares quando solicitado: ajuda ocasionalmente quando Auxiliares têm dúvidas (2-3x por semana, 10-15min cada), mas ainda não tem responsabilidade formal de desenvolvimento, foco principal é desenvolver competências próprias primeiro antes de ensinar sistematicamente outros",
+        "B": "Mentoria estruturada de 1-2 Auxiliares E-F: rituais básicos (reunião quinzenal de 30-45min, shadowing ocasional), valida 20-30% dos casos do mentorado quando solicitado, fornece feedback sobre decisões e abordagem, compartilha frameworks e técnicas que usa para casos médios, feedback positivo dos mentorados sobre utilidade (>3.8/5.0)",
+        "C": "Mentoria formal de 2-3 Auxiliares E-F-G: rituais consistentes (reunião quinzenal de 60min dedicada a desenvolvimento + coaching situacional 3-5x por semana quando surgem dúvidas), valida 30-40% dos casos médios que mentorados estão assumindo, fornece feedback estruturado balanceado (3 pontos positivos : 1 ponto de melhoria), adapta estilo ao perfil do mentorado (analítico vs intuitivo, confiante vs inseguro), documenta progresso e reporta evolução trimestralmente, pelo menos 1 mentorado promovido nos últimos 12-18 meses",
+        "D": "Mentoria abrangente de 3-4 Auxiliares + referência para Assistentes A-B: mentora 3-4 Auxiliares E-F-G formalmente + fornece coaching situacional para Assistentes A-B quando solicitado (5-10x por semana), rituais estruturados (reunião individual quinzenal 60min + shadowing bidirecional semanal + validação 40-50% casos críticos), cria materiais didáticos (guias de 2-3 páginas sobre como tratar tipo específico de caso médio, vídeos tutoriais 10-15min, casos de estudo detalhados), conduz mini-treinamentos mensais 60-90min para grupos de 4-6 pessoas, pelo menos 1-2 mentorados promovidos anualmente",
+        "E": "Mantém mentoria nível D de 3-4 Auxiliares + começa mentoria informal de 1-2 Assistentes A-B: coaching situacional quando Assistentes júnior enfrentam casos médios complexos ou atípicos (acompanha análise, valida raciocínio, fornece frameworks adicionais), compartilha técnicas de análise de casos complexos que está aprendendo com Analista, delega casos médios com supervisão para desenvolver Auxiliares G e Assistentes A",
+        "F": "Mentoria ampliada multi-nível: 2-3 Auxiliares E-F-G + 1-2 Assistentes A-B-C, investe 15-20% do tempo (12-16h/mês) em desenvolvimento de pessoas, conduz treinamentos coletivos trimestrais de 2-4h sobre análise de casos complexos ou negociação avançada, cria biblioteca de conhecimento (10-15 casos de estudo documentados, 5-8 playbooks de casos médios complexos, múltiplos vídeos tutoriais), avalia prontidão para promoção fornecendo input formal significativo, 2-3 mentorados promovidos anualmente",
+        "G": "Mentoria consolidada próxima de Analista: desenvolve 4-6 pessoas simultaneamente (2-3 Auxiliares + 2-3 Assistentes) em estágios diferentes, programa estruturado com objetivos trimestrais claros e métricas de progresso para cada mentorado, coordena programa de mentoria quando há múltiplos mentores (garante consistência de abordagem e calibração), prepara sucessores intencionalmente para assumir área funcional quando for promovido, taxa de promoção >30-40% dos mentorados anualmente, feedback de mentorados >4.5/5.0, competência de desenvolvimento rivaliza Analistas júnior"
+    },
+    "9. KPIs Principais (TMR, FCR, Qualidade de Resolução)": {
+        "A": "TMR >12-15 dias inicialmente (casos médios naturalmente mais lentos que simples), FCR não medido consistentemente ou <60%, Qualidade >75% (% casos resolvidos sem retrabalho ou escalação por erro), valida 70-80% decisões críticas ainda, foco é desenvolver competência não velocidade",
+        "B": "TMR ~10-12 dias, FCR 60-65%, Qualidade >80%, valida 40-50% decisões (redução vs 70-80% do A), mantém performance razoável mesmo em períodos de maior demanda, atinge metas em 70-80% dos meses, oscilação mensal está diminuindo (ganhando consistência)",
+        "C": "TMR <7 dias, FCR >70%, Qualidade >85%, valida apenas 20% decisões (situações genuinamente atípicas), mantém performance consistente mesmo com carteira grande (35-45 casos) e em picos de demanda, atinge ou supera metas em 85-90% dos meses, desvio padrão baixo (performance estável semana a semana)",
+        "D": "TMR <5.5 dias (frequentemente top 20% do time), FCR >75%, Qualidade >90%, autonomia quase total, consistência absoluta por 12+ meses (atinge metas em >95% dos meses), absorve picos de até 60-70 casos sem deterioração significativa, é benchmark interno ('veja performance do Fulano, esse é o padrão'), desvio padrão muito baixo",
+        "E": "Mantém excelência em casos médios (TMR <5.5d, FCR >75%, Qualidade >90%) + desenvolve performance em casos complexos iniciais: TMR casos complexos ~18-20 dias (vs <12 que seria de Analista experiente), taxa resolução >65% casos complexos sem escalação adicional para Analista sênior, não pode haver deterioração significativa de performance em casos médios ao assumir complexos (máximo 10-15% piora temporária aceitável nos primeiros 2-3 meses)",
+        "F": "Performance híbrida consolidada: casos médios TMR <6d + casos complexos TMR <15 dias e resolução >70-75%, qualidade >85% em ambos tipos, balanceia ambos mantendo metas combinadas, consistência em 85-90% dos meses, demonstra que consegue gerenciar maior complexidade sem sacrificar resultado, gap vs Analistas A-B está diminuindo",
+        "G": "Performance próxima de Analista A-B: casos médios TMR <6d (top 10-20%) + casos complexos TMR <12 dias e resolução >75-80%, qualidade >88% em ambos, consistência >90% dos meses atingindo metas, gap de performance vs Analistas A-B é pequeno (<20% diferença), claramente pronto tecnicamente para promoção, desempenho já rivaliza Analistas júnior"
+    },
+    "10. Liderança de Projetos e Iniciativas de Melhoria": {
+        "A": "Participa de projetos executando tarefas delegadas: recebe workstream ou tarefas específicas em projeto tático (4-6 meses, 6-10 pessoas), executa com qualidade e no prazo, contribui com perspectiva operacional quando solicitado, mas não tem ownership de frente completa ainda, propõe pequenas melhorias ocasionalmente (1-2 por ano)",
+        "B": "Assume workstream específico em projetos táticos: em projeto de médio porte (6-9 meses, 8-12 pessoas) assume frente completa com autonomia crescente, coordena 2-4 pessoas na frente, reporta progresso semanal em reuniões de projeto, entrega workstream no prazo com qualidade, identifica oportunidades de melhoria baseadas em padrões (2-3 propostas por ano, pelo menos 1 implementada)",
+        "C": "Lidera projetos táticos pequenos/médios: lidera projeto completo (4-6 meses, 4-6 pessoas, impacto 20-30%) com autonomia supervisionada, cria plano estruturado (objetivo SMART + ações + cronograma + pessoas + recursos), coordena execução com reuniões semanais de 45-60min, gerencia expectativas de stakeholders comunicando progresso mensalmente, comprova impacto através de medição antes/depois sustentada >60 dias, apresenta resultado 20-30min para Analista/Supervisor, pelo menos 1-2 projetos com sucesso documentado nos últimos 12-18 meses",
+        "D": "Lidera múltiplos projetos táticos ou projetos de maior complexidade: lidera 2-3 projetos pequenos simultaneamente OU 1 projeto médio/grande (6-12 meses, 8-15 pessoas, R$ 100k-200k investimento, impacto 30-40%), business case estruturado de 3-5 páginas (problema quantificado + solução + alternativas consideradas + benefícios + custos + ROI), gestão profissional (cronograma com milestones, RACI, RAID log, steering mensal), gerencia stakeholders de 3-4 áreas diferentes, comprova impacto rigoroso >90 dias com ROI >2:1, apresenta para Coordenação 30-45min, pelo menos 1-2 projetos grandes/ano com impacto documentado",
+        "E": "Mantém capacidade de liderar projetos táticos nível D + participa de projetos estratégicos liderados por Analistas: assume workstream significativo em projeto corporativo (9-15 meses, 15-25 pessoas, R$ 300k-600k), coordena 5-8 pessoas na frente específica, maior visibilidade e complexidade política (múltiplas áreas, stakeholders executivos), reporta para Analista líder do projeto mas com autonomia significativa na frente, aprende observando como Analistas estruturam projetos transformacionais",
+        "F": "Lidera projetos de médio/grande porte: lidera projeto transformacional menor (9-12 meses, 10-18 pessoas, R$ 200k-400k, impacto 35-45%), business case robusto 5-8 páginas com análise de riscos detalhada e plano de mitigação, metodologia profissional PMI/Agile adaptada, governance com steering committee trimestral, gerencia stakeholders de 5-6 áreas incluindo liderança sênior (Coordenação/Gerência), change management estruturado (comunicação multi-canal, treinamentos, champions network), comprova impacto transformacional sustentado >6 meses ROI >2.5:1, apresenta para Gerência/Diretoria 45-60min",
+        "G": "Lidera projetos estratégicos próximos de Analista: lidera projeto de grande porte (12-18 meses, 15-25 pessoas, R$ 400k-800k, impacto >50%), business case executivo 8-12 páginas defendendo investimento significativo, coordena equipe grande com sub-líderes, gerencia complexidade política alta (múltiplos VPs/Diretores como stakeholders), apresenta em steering executivo mensalmente, change management profissional em escala (impacta 50-100 pessoas), impacto documentado >R$ 300k-500k de valor criado ou custo evitado, competência de liderança de projetos rivaliza Analistas júnior"
+    }
+}
+
+
+
 # Inicializar session_state para armazenar respostas
 if 'respostas' not in st.session_state:
     st.session_state.respostas = {}
@@ -281,15 +380,63 @@ if 'nome_avaliado' not in st.session_state:
 if 'selecoes_temp' not in st.session_state:
     st.session_state.selecoes_temp = {}
 
+
+# Seleção de cargo
+if 'cargo_selecionado' not in st.session_state:
+    st.session_state.cargo_selecionado = None
+
+if not st.session_state.cargo_selecionado:
+    st.markdown("### 🎯 Selecione o Cargo")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if st.button("📋 Auxiliar Operacional", use_container_width=True, type="primary"):
+            st.session_state.cargo_selecionado = "Auxiliar Operacional"
+            st.rerun()
+    
+    with col2:
+        if st.button("📋 Assistente Operacional", use_container_width=True, type="primary"):
+            st.session_state.cargo_selecionado = "Assistente Operacional"
+            st.rerun()
+    
+    st.stop()  # Para aqui se cargo não foi selecionado
+
+# Mostrar cargo selecionado
+st.success(f"**Cargo:** {st.session_state.cargo_selecionado}")
+
+# Selecionar critérios baseado no cargo
+criterios = CRITERIOS_AUXILIAR if st.session_state.cargo_selecionado == "Auxiliar Operacional" else CRITERIOS_ASSISTENTE
+
+
 # Campo de nome FORA do formulário para atualizar em tempo real
-st.markdown("### 👤 Informações do Avaliado")
-nome_avaliado = st.text_input(
-    "Nome completo do colaborador avaliado:",
-    value=st.session_state.nome_avaliado,
-    placeholder="Digite o nome completo do colaborador",
-    key="nome_avaliado_input"
-)
-st.session_state.nome_avaliado = nome_avaliado
+
+st.markdown("### 👤 Identificação")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    nome_avaliado = st.text_input(
+        "Nome do Avaliado:",
+        value=st.session_state.nome_avaliado,
+        key="nome_input"
+    )
+    st.session_state.nome_avaliado = nome_avaliado
+
+with col2:
+    setor = st.text_input(
+        "Setor:",
+        value=st.session_state.get('setor', ''),
+        key="setor_input"
+    )
+    st.session_state.setor = setor
+
+with col3:
+    avaliador = st.text_input(
+        "Nome do Avaliador:",
+        value=st.session_state.get('avaliador', ''),
+        key="avaliador_input"
+    )
+    st.session_state.avaliador = avaliador
 
 st.markdown("---")
 st.markdown("### 📝 Selecione o nível que melhor descreve o profissional em cada critério:")
